@@ -22,18 +22,32 @@ var Home = React.createClass({displayName: "Home",
 });
 
 Home.Bombe = React.createClass({displayName: "Bombe",
+	track: "#neobombe",
 	units: [],
 	fetchTweetTimerID: -1,
-	encryptTimerID: -1,
 	decryptTimerID: -1,
 	restartTimerID: -1,
 	getInitialState: function() {
-		return {state: STATE_STOPPED, user: "", texts: []};
+		return {
+			state: STATE_STOPPED,
+			user: "",
+			message: "",
+			texts: [],
+			debugMode: false,
+		};
 	},
 	componentWillMount: function() {
 		for (var i = 0; i < NUM_UNITS; i++) {
 			this.units[i] = new Unit(i);
 		}
+		dispatcher.register(function(payload) {
+			switch (payload.type) {
+			case "onTrackChanged":
+				this.track = payload.track; break;
+			case "onDebugModeChanged":
+				this.onDebugModeChanged(payload.debugMode); break;
+			}
+		}.bind(this));
 	},
 	componentWillUnmount: function() {
 		this.onStopped();
@@ -41,18 +55,22 @@ Home.Bombe = React.createClass({displayName: "Bombe",
 	},
 	render: function() {
 		var elem;
-		switch (this.state.state) {
-		default:
-		case STATE_STOPPED:
-			elem = React.createElement(Home.Stopped, null); break;
-		case STATE_FINDING_MESSAGE:
-			elem = React.createElement(Home.FindingMessage, null); break;
-		case STATE_RECEIVED_MESSAGE:
-			elem = React.createElement(Home.ReceivedMessage, {user: this.state.user}); break;
-		case STATE_DECRYPTING:
-			elem = React.createElement(Home.Decrypting, {texts: this.state.texts}); break;
-		case STATE_DECRYPTED:
-			elem = React.createElement(Home.Decrypted, {texts: this.state.texts}); break;
+		if (this.state.debugMode) {
+			elem = React.createElement(Home.Debugging, null);
+		} else {
+			switch (this.state.state) {
+			default:
+			case STATE_STOPPED:
+				elem = React.createElement(Home.Stopped, null); break;
+			case STATE_FINDING_MESSAGE:
+				elem = React.createElement(Home.FindingMessage, null); break;
+			case STATE_RECEIVED_MESSAGE:
+				elem = React.createElement(Home.ReceivedMessage, {user: this.state.user, message: this.state.message}); break;
+			case STATE_DECRYPTING:
+				elem = React.createElement(Home.Decrypting, {texts: this.state.texts}); break;
+			case STATE_DECRYPTED:
+				elem = React.createElement(Home.Decrypted, {texts: this.state.texts}); break;
+			}
 		}
 		return (
 			React.createElement("div", {className: "stage-wrapper"}, 
@@ -61,19 +79,26 @@ Home.Bombe = React.createClass({displayName: "Bombe",
 		);
 	},
 	toggle: function() {
-		var state = this.state.state;
-		if (state == STATE_STOPPED) {
-			this.onStarted();
+		if (this.state.debugMode) {
+			if (!this.state.debugMotorStarted) {
+				this.onDebugStarted();
+			} else {
+				this.onDebugStopped();
+			}
 		} else {
-			this.onStopped();
+			var state = this.state.state;
+			if (state == STATE_STOPPED) {
+				this.onStarted();
+			} else {
+				this.onStopped();
+			}
 		}
 	},
 	encrypt: function(msg) {
 		var index = Math.floor(Math.random() * NUM_UNITS);
 		var m = this.units[index].enigma;
-		var es = m.encrypt(msg);
-		console.log("Encrypted: " + es.encrypted + " Original: " + es.original);
-		this.onEncrypted(es.encrypted, es.original);
+		return m.encrypt(msg);
+		//console.log("Encrypted: " + es.encrypted + " Original: " + es.original);
 	},
 	decrypt: function(msg, orig) {
 		var texts = this.state.texts;
@@ -97,12 +122,19 @@ Home.Bombe = React.createClass({displayName: "Bombe",
 		}
 	},
 	requestTweet: function() {
-		ipcSend("requestTweet", {track: "#DEVIL"});
+		ipcSend("requestTweet", {track: this.track});
+	},
+	startMotors: function() {
+		ipcSend("startMotors");
+	},
+	stopMotors: function() {
+		ipcSend("stopMotors");
 	},
 	onTweet: function(tweet) {
 		if (this.state.state == STATE_FINDING_MESSAGE) {
-			this.setState({state: STATE_RECEIVED_MESSAGE, user: tweet.user.name});
-			this.encryptTimerID = setTimeout(this.encrypt, 5000, tweet.text);
+			var message = this.encrypt(tweet.text);
+			this.setState({state: STATE_RECEIVED_MESSAGE, user: tweet.user.name, message: message.encrypted});
+			this.decryptTimerID = setTimeout(this.decrypt, 5000, message.encrypted, message.original);
 		}
 	},
 	onStarted: function() {
@@ -113,18 +145,13 @@ Home.Bombe = React.createClass({displayName: "Bombe",
 		this.setState({state: STATE_STOPPED});
 
 		clearTimeout(this.fetchTweetTimerID);
-		clearTimeout(this.encryptTimerID);
 		clearTimeout(this.decryptTimerID);
 		clearTimeout(this.restartTimerID);
 		this.fetchTweetTimerID = -1;
-		this.encryptTimerID = -1;
 		this.decryptTimerID = -1;
 		this.restartTimerID = -1;
 
 		this.stopMotors();
-	},
-	onEncrypted: function(msg, orig) {
-		this.decrypt(msg, orig);
 	},
 	onDecrypting: function(i, msg) {
 		this.startMotors();
@@ -140,11 +167,33 @@ Home.Bombe = React.createClass({displayName: "Bombe",
 		this.restartTimerID = setTimeout(this.onStarted, 10000);
 		console.log("Successfully decrypted the message: " + msg);
 	},
-	startMotors: function() {
-		ipcSend("startMotors");
+	onDebugModeChanged: function(debugMode) {
+		if (debugMode) {
+			this.onStopped();
+		} else {
+			this.onDebugStopped();
+		}
+		this.setState({debugMode: debugMode});
 	},
-	stopMotors: function() {
-		ipcSend("stopMotors");
+	onDebugStarted: function() {
+		this.startMotors();
+		this.setState({debugMotorStarted: true});
+		console.log("debug: starting motors");
+	},
+	onDebugStopped: function() {
+		this.stopMotors();
+		this.setState({debugMotorStarted: false});
+		console.log("debug: stopped motors");
+	},
+});
+
+Home.Debugging = React.createClass({displayName: "Debugging",
+	render: function() {
+		return (
+			React.createElement("div", {className: "stage"}, 
+				React.createElement("h1", null, "Debugging")
+			)
+		);
 	},
 });
 
@@ -172,7 +221,8 @@ Home.ReceivedMessage = React.createClass({displayName: "ReceivedMessage",
 	render: function() {
 		return (
 			React.createElement("div", {className: "stage"}, 
-				React.createElement("h1", null, "INTERCEPTED A MESSAGE FROM ", React.createElement("span", {className: "user"}, this.props.user))
+				React.createElement("h1", null, "INTERCEPTED A MESSAGE FROM ", React.createElement("span", {className: "user"}, this.props.user)), 
+				React.createElement("p", {className: "message"}, this.props.message)
 			)
 		);
 	},

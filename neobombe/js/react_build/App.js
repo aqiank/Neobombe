@@ -3,6 +3,8 @@ var App = React.createClass({displayName: "App",
 		return {
 			ports: [],
 			showStatus: false,
+			track: "#neobombe",
+			debugMode: false,
 		};
 	},
 	componentDidMount: function() {
@@ -34,7 +36,7 @@ var App = React.createClass({displayName: "App",
 		return (
 			React.createElement("div", {className: "app"}, 
 				React.createElement(Home, {ref: "home"}), 
-				this.state.showStatus ? React.createElement(Status, {ports: this.state.ports}) : ""
+				React.createElement(Status, {show: this.state.showStatus, ports: this.state.ports})
 			)
 		);
 	},

@@ -38,14 +38,14 @@ app.on('ready', function() {
 
 	mainWindow.openDevTools();
 
-	// Toggle between Home and Status page
-	globalShortcut.register("ctrl+shift+tab", function() {
-		ipcSend("toggleUI");
+	// Toggle Bombe (start/stop)
+	globalShortcut.register("1", function() {
+		ipcSend("toggleBombe");
 	});
 
-	// Toggle Bombe (start/stop)
-	globalShortcut.register("ctrl+shift+space", function() {
-		ipcSend("toggleBombe");
+	// Toggle between Home and Status page
+	globalShortcut.register("2", function() {
+		ipcSend("toggleUI");
 	});
 
 	// Fetch new tweet when requested
@@ -56,7 +56,8 @@ app.on('ready', function() {
 				stream.destroy();
 			});
 			stream.on("error", function(error) {
-				throw error;
+				alert(error);
+				//throw error;
 			});
 		});
 	});
