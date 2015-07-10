@@ -1,0 +1,9 @@
+{
+	"name": "Neobombe",
+	"version": "0.1.0",
+	"main": "main.js",
+	"devDependencies": {
+		"serialport": "^1.7.4",
+		"twitter": "^1.2.5"
+	}
+}

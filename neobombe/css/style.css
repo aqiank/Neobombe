@@ -1,0 +1,74 @@
+html, body, #root { width: 100%; height: 100%; background: #001122 }
+#root { display: table }
+
+* { margin: 0}
+
+.app {
+	width: 100%;
+	height: 100%;
+	position: relative;
+}
+
+.stage-wrapper, .status-wrapper {
+	width: 100%;
+	height: 100%;
+	display: table;
+	position: absolute;
+}
+
+.stage, .status {
+	background: #001122;
+	width: 100%;
+	height: 100%;
+	display: table-cell;
+	vertical-align: middle;
+}
+
+.stage h1, .status h1,
+.stage h2, .status h2,
+.stage h3, .status h3,
+.stage h4, .status h4,
+.stage h5, .status h5,
+.stage h6, .status h6 {
+	color: #00ccff;
+	font-family: "Fira", Helvetica, Arial, sans-serif;
+	width: 80%;
+	text-align: center;
+	text-transform: uppercase;
+	font-size: 2.5rem;
+	font-size: 5vh;
+	white-space: -moz-pre-wrap !important;
+	white-space: -pre-wrap;
+	white-space: -o-pre-wrap;
+	white-space: pre-wrap;
+	word-wrap: break-word;
+	white-space: -webkit-pre-wrap;
+	word-break: break-all;
+	white-space: normal;
+	margin: 0 auto;
+}
+
+.message {
+	font-family: sans-serif;
+	color: #00ccff;
+	text-align: center;
+	text-transform: uppercase;
+}
+
+.message.original {
+	color: #ffff00;
+}
+
+.user {
+	color: #ffffff;
+}
+
+.row {
+	margin-top: 16px;
+	text-align: center;
+}
+
+.port {
+	font-family: sans-serif;
+	color: white;
+}
