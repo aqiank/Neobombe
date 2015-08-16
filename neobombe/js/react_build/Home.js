@@ -27,6 +27,7 @@ Home.Bombe = React.createClass({displayName: "Bombe",
 	fetchTweetTimerID: -1,
 	decryptTimerID: -1,
 	restartTimerID: -1,
+	startMotorTimerID: -1,
 	getInitialState: function() {
 		return {
 			state: STATE_STOPPED,
@@ -63,7 +64,7 @@ Home.Bombe = React.createClass({displayName: "Bombe",
 			case STATE_STOPPED:
 				elem = React.createElement(Home.Stopped, null); break;
 			case STATE_FINDING_MESSAGE:
-				elem = React.createElement(Home.FindingMessage, null); break;
+				elem = React.createElement(Home.FindingMessage, {track: this.track}); break;
 			case STATE_RECEIVED_MESSAGE:
 				elem = React.createElement(Home.ReceivedMessage, {user: this.state.user, message: this.state.message}); break;
 			case STATE_DECRYPTING:
@@ -135,6 +136,7 @@ Home.Bombe = React.createClass({displayName: "Bombe",
 			var message = this.encrypt(tweet.text);
 			this.setState({state: STATE_RECEIVED_MESSAGE, user: tweet.user.name, message: message.encrypted});
 			this.decryptTimerID = setTimeout(this.decrypt, 5000, message.encrypted, message.original);
+			this.startMotorTimerID = setTimeout(this.startMotors, 5000);
 		}
 	},
 	onStarted: function() {
@@ -147,14 +149,15 @@ Home.Bombe = React.createClass({displayName: "Bombe",
 		clearTimeout(this.fetchTweetTimerID);
 		clearTimeout(this.decryptTimerID);
 		clearTimeout(this.restartTimerID);
+		clearTimeout(this.startMotorTimerID);
 		this.fetchTweetTimerID = -1;
 		this.decryptTimerID = -1;
 		this.restartTimerID = -1;
+		this.startMotorTimerID = -1;
 
 		this.stopMotors();
 	},
 	onDecrypting: function(i, msg) {
-		this.startMotors();
 		var texts = this.state.texts;
 		texts[i] = {text: msg, isOriginal: false};
 		this.setState({state: STATE_DECRYPTING, texts: texts});
@@ -164,7 +167,7 @@ Home.Bombe = React.createClass({displayName: "Bombe",
 		var texts = this.state.texts;
 		texts[i] = {text: msg, isOriginal: true};
 		this.setState({state: STATE_DECRYPTED, texts: texts});
-		this.restartTimerID = setTimeout(this.onStarted, 10000);
+		this.restartTimerID = setTimeout(this.onStarted, 20000);
 		console.log("Successfully decrypted the message: " + msg);
 	},
 	onDebugModeChanged: function(debugMode) {
@@ -211,7 +214,7 @@ Home.FindingMessage = React.createClass({displayName: "FindingMessage",
 	render: function() {
 		return (
 			React.createElement("div", {className: "stage"}, 
-				React.createElement("h1", null, "WAITING FOR A SECRET MESSAGE")
+				React.createElement("h1", null, "WAITING FOR TWEETS FROM ", this.props.track)
 			)
 		);
 	},
@@ -221,7 +224,7 @@ Home.ReceivedMessage = React.createClass({displayName: "ReceivedMessage",
 	render: function() {
 		return (
 			React.createElement("div", {className: "stage"}, 
-				React.createElement("h1", null, "INTERCEPTED A MESSAGE FROM ", React.createElement("span", {className: "user"}, this.props.user)), 
+				React.createElement("h1", null, "INTERCEPTED A SECRET MESSAGE FROM ", React.createElement("span", {className: "user"}, this.props.user)), 
 				React.createElement("p", {className: "message"}, this.props.message)
 			)
 		);

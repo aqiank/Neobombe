@@ -27,6 +27,7 @@ Home.Bombe = React.createClass({
 	fetchTweetTimerID: -1,
 	decryptTimerID: -1,
 	restartTimerID: -1,
+	startMotorTimerID: -1,
 	getInitialState: function() {
 		return {
 			state: STATE_STOPPED,
@@ -63,7 +64,7 @@ Home.Bombe = React.createClass({
 			case STATE_STOPPED:
 				elem = <Home.Stopped />; break;
 			case STATE_FINDING_MESSAGE:
-				elem = <Home.FindingMessage />; break;
+				elem = <Home.FindingMessage track={this.track} />; break;
 			case STATE_RECEIVED_MESSAGE:
 				elem = <Home.ReceivedMessage user={this.state.user} message={this.state.message} />; break;
 			case STATE_DECRYPTING:
@@ -135,6 +136,7 @@ Home.Bombe = React.createClass({
 			var message = this.encrypt(tweet.text);
 			this.setState({state: STATE_RECEIVED_MESSAGE, user: tweet.user.name, message: message.encrypted});
 			this.decryptTimerID = setTimeout(this.decrypt, 5000, message.encrypted, message.original);
+			this.startMotorTimerID = setTimeout(this.startMotors, 5000);
 		}
 	},
 	onStarted: function() {
@@ -147,14 +149,15 @@ Home.Bombe = React.createClass({
 		clearTimeout(this.fetchTweetTimerID);
 		clearTimeout(this.decryptTimerID);
 		clearTimeout(this.restartTimerID);
+		clearTimeout(this.startMotorTimerID);
 		this.fetchTweetTimerID = -1;
 		this.decryptTimerID = -1;
 		this.restartTimerID = -1;
+		this.startMotorTimerID = -1;
 
 		this.stopMotors();
 	},
 	onDecrypting: function(i, msg) {
-		this.startMotors();
 		var texts = this.state.texts;
 		texts[i] = {text: msg, isOriginal: false};
 		this.setState({state: STATE_DECRYPTING, texts: texts});
@@ -164,7 +167,7 @@ Home.Bombe = React.createClass({
 		var texts = this.state.texts;
 		texts[i] = {text: msg, isOriginal: true};
 		this.setState({state: STATE_DECRYPTED, texts: texts});
-		this.restartTimerID = setTimeout(this.onStarted, 10000);
+		this.restartTimerID = setTimeout(this.onStarted, 20000);
 		console.log("Successfully decrypted the message: " + msg);
 	},
 	onDebugModeChanged: function(debugMode) {
@@ -211,7 +214,7 @@ Home.FindingMessage = React.createClass({
 	render: function() {
 		return (
 			<div className="stage">
-				<h1>WAITING FOR A SECRET MESSAGE</h1>
+				<h1>WAITING FOR TWEETS FROM {this.props.track}</h1>
 			</div>
 		);
 	},
@@ -221,7 +224,7 @@ Home.ReceivedMessage = React.createClass({
 	render: function() {
 		return (
 			<div className="stage">
-				<h1>INTERCEPTED A MESSAGE FROM <span className="user">{this.props.user}</span></h1>
+				<h1>INTERCEPTED A SECRET MESSAGE FROM <span className="user">{this.props.user}</span></h1>
 				<p className="message">{this.props.message}</p>
 			</div>
 		);
