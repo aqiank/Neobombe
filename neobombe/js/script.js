@@ -1,33 +1,6 @@
 var ipc = require("ipc");
 var dispatcher = new Flux.Dispatcher();
 
-function buildElements(items, elemFunc, start, end) {
-        var elems = [];
-
-        if (!items) {
-            return elems;
-        }
-
-		if (!start) {
-			start = 0;
-		}
-
-		if (!end) {
-			end = items.length;
-		} else {
-			end = end > items.length ? items.length : end;
-		}
-
-        for (var i = start; i < end; i++) {
-			var ret = elemFunc(i, items[i]);
-			if (ret) {
-				elems.push(ret);
-			}
-        }
-
-        return elems;
-}
-
 function clone(src) {
 	function mixin(dest, source, copyFunc) {
 		var name, s, i, empty = {};

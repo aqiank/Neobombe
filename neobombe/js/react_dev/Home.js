@@ -1,3 +1,5 @@
+var ipc = require("ipc");
+
 const STATE_STOPPED = 0,
       STATE_FINDING_MESSAGE = 1,
       STATE_RECEIVED_MESSAGE = 2,
@@ -123,13 +125,13 @@ Home.Bombe = React.createClass({
 		}
 	},
 	requestTweet: function() {
-		ipcSend("requestTweet", {track: this.track});
+		ipc.send("requestTweet", {track: this.track});
 	},
 	startMotors: function() {
-		ipcSend("startMotors");
+		ipc.send("startMotors");
 	},
 	stopMotors: function() {
-		ipcSend("stopMotors");
+		ipc.send("stopMotors");
 	},
 	onTweet: function(tweet) {
 		if (this.state.state == STATE_FINDING_MESSAGE) {
@@ -234,7 +236,7 @@ Home.Decrypting = React.createClass({
 			<div className="stage">
 				<h1>DECRYPTING</h1>
 				<div>{
-					texts ? texts.map(function(m) {
+					texts ? texts.map(function(t) {
 						return <p className="message">{t.text}</p>
 					}) : ""
 				}</div>

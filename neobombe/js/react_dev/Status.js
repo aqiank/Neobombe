@@ -38,7 +38,7 @@ var Status = React.createClass({
 	},
 	portElements: function(type) {
 		var ports = this.props.ports;
-		return props ? props.map(function(p) {
+		return ports ? ports.map(function(p) {
 			if (p.type == type) {
 				return <p className="port" key={p.comName}>{p.comName}</p>
 			}

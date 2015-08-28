@@ -40,23 +40,23 @@ app.on('ready', function() {
 
 	// Toggle Bombe (start/stop)
 	globalShortcut.register("1", function() {
-		ipcSend("toggleBombe");
+		mainWindow.webContents.send("toggleBombe");
 	});
 
 	// Toggle between Home and Status page
 	globalShortcut.register("2", function() {
-		ipcSend("toggleUI");
+		mainWindow.webContents.send("toggleUI");
 	});
 
 	// Fetch new tweet when requested
 	ipc.on("requestTweet", function(event, data) {
 		client.stream("statuses/filter", {track: data.track}, function(stream) {
 			stream.on("data", function(tweet) {
-				ipcSend("onTweet", tweet);
+				mainWindow.webContents.send("onTweet", tweet);
 				stream.destroy();
 			});
 			stream.on("error", function(error) {
-				alert(error);
+				console.log(error);
 				//throw error;
 			});
 		});
@@ -136,7 +136,7 @@ function onSerialConnected(port) {
 	}
 
 	ports.push(port);
-	ipcSend("onSerialConnected", {ports: ports, port: port});
+	ipc.send("onSerialConnected", {ports: ports, port: port});
 	console.log("Serial port " + port.comName + " connected");
 }
 
@@ -144,14 +144,14 @@ function onSerialDisconnected(port) {
 	for (var i = 0; i < ports.length; i++) {
 		if (ports[i].comName == port.comName) {
 			ports.splice(i, 1);
-			ipcSend("onSerialDisconnected", {ports: ports, port: port});
+			ipc.send("onSerialDisconnected", {ports: ports, port: port});
 			console.log("Serial port " + port.comName + " disconnected");
 		}
 	}
 }
 
 function onSerialError(port, err) {
-	ipcSend("onSerialError", {port: port, err: err});
+	ipc.send("onSerialError", {port: port, err: err});
 }
 
 function alreadyConnected(port) {
