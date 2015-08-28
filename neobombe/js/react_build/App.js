@@ -8,27 +8,27 @@ var App = React.createClass({displayName: "App",
 		};
 	},
 	componentDidMount: function() {
-		ipcOn("onSerialConnected", function(data) {
+		ipc.on("onSerialConnected", function(data) {
 			this.onSerialConnected(data.ports);
 		}.bind(this));
 
-		ipcOn("onSerialDisconnected", function(data) {
+		ipc.on("onSerialDisconnected", function(data) {
 			this.onSerialDisconnected(data.ports);
 		}.bind(this));
 
-		ipcOn("onSerialError", function(data) {
+		ipc.on("onSerialError", function(data) {
 			console.log("onSerialError: " + data.err);
 		}.bind(this));
 
-		ipcOn("toggleUI", function() {
+		ipc.on("toggleUI", function() {
 			this.setState({showStatus: !this.state.showStatus});
 		}.bind(this));
 
-		ipcOn("toggleBombe", function() {
+		ipc.on("toggleBombe", function() {
 			this.refs.home.toggleBombe();
 		}.bind(this));
 
-		ipcOn("onTweet", function(tweet) {
+		ipc.on("onTweet", function(tweet) {
 			this.refs.home.onTweet(tweet);
 		}.bind(this));
 	},

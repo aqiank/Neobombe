@@ -1,16 +1,6 @@
 var ipc = require("ipc");
 var dispatcher = new Flux.Dispatcher();
 
-function ipcOn(chan, f) {
-	if (typeof f == "function") {
-		ipc.on(chan, f);
-	}
-}
-
-function ipcSend(chan, msg) {
-	ipc.send(chan, msg);
-}
-
 function buildElements(items, elemFunc, start, end) {
         var elems = [];
 

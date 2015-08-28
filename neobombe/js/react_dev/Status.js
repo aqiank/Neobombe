@@ -37,12 +37,13 @@ var Status = React.createClass({
 		);
 	},
 	portElements: function(type) {
-		return buildElements(this.props.ports, function(i, p) {
+		var ports = this.props.ports;
+		return props ? props.map(function(p) {
 			if (p.type == type) {
 				return <p className="port" key={p.comName}>{p.comName}</p>
 			}
 			return null;
-		});
+		}) : ""
 	},
 	onTrackChanged: function(e) {
 		dispatcher.dispatch({

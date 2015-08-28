@@ -1,8 +1,8 @@
 const STATE_STOPPED = 0,
       STATE_FINDING_MESSAGE = 1,
-	  STATE_RECEIVED_MESSAGE = 2,
-	  STATE_DECRYPTING = 5,
-	  STATE_DECRYPTED = 6;
+      STATE_RECEIVED_MESSAGE = 2,
+      STATE_DECRYPTING = 5,
+      STATE_DECRYPTED = 6;
 
 const NUM_UNITS = 36;
 const NUM_COMBINATIONS = 26 * 26 * 26;
@@ -150,10 +150,6 @@ Home.Bombe = React.createClass({
 		clearTimeout(this.decryptTimerID);
 		clearTimeout(this.restartTimerID);
 		clearTimeout(this.startMotorTimerID);
-		this.fetchTweetTimerID = -1;
-		this.decryptTimerID = -1;
-		this.restartTimerID = -1;
-		this.startMotorTimerID = -1;
 
 		this.stopMotors();
 	},
@@ -233,36 +229,32 @@ Home.ReceivedMessage = React.createClass({
 
 Home.Decrypting = React.createClass({
 	render: function() {
+		var texts = this.props.texts;
 		return (
 			<div className="stage">
 				<h1>DECRYPTING</h1>
-				<div>
-					{this.textElements()}
-				</div>
+				<div>{
+					texts ? texts.map(function(m) {
+						return <p className="message">{t.text}</p>
+					}) : ""
+				}</div>
 			</div>
 		);
-	},
-	textElements: function() {
-		return buildElements(this.props.texts, function(i, t) {
-			return <p className="message">{t.text}</p>;
-		});
 	},
 });
 
 Home.Decrypted = React.createClass({
 	render: function() {
+		var texts = this.props.texts;
 		return (
 			<div className="stage">
 				<h1>DECRYPTED!</h1>
-				<div>
-					{this.textElements()}
-				</div>
+				<div>{
+					texts ? texts.map(function(t) {
+						return <p className={t.isOriginal ? "message original" : "message"}>{t.text}</p>
+					}) : ""
+				}</div>
 			</div>
 		);
-	},
-	textElements: function() {
-		return buildElements(this.props.texts, function(i, t) {
-			return <p className={t.isOriginal ? "message original" : "message"}>{t.text}</p>
-		});
 	},
 });

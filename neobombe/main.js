@@ -49,7 +49,7 @@ app.on('ready', function() {
 	});
 
 	// Fetch new tweet when requested
-	ipcOn("requestTweet", function(event, data) {
+	ipc.on("requestTweet", function(event, data) {
 		client.stream("statuses/filter", {track: data.track}, function(stream) {
 			stream.on("data", function(tweet) {
 				ipcSend("onTweet", tweet);
@@ -63,7 +63,7 @@ app.on('ready', function() {
 	});
 
 	// Handle starting motors
-	ipcOn("startMotors", function(event, data) {
+	ipc.on("startMotors", function(event, data) {
 		for (var i = 0; i < ports.length; i++) {
 			ports[i].write([65], function(error) {
 				// Do nothing
@@ -72,7 +72,7 @@ app.on('ready', function() {
 	});
 
 	// Handle stopping motors
-	ipcOn("stopMotors", function(event, data) {
+	ipc.on("stopMotors", function(event, data) {
 		for (var i = 0; i < ports.length; i++) {
 			ports[i].write([66], function(error) {
 				// Do nothing
@@ -152,18 +152,6 @@ function onSerialDisconnected(port) {
 
 function onSerialError(port, err) {
 	ipcSend("onSerialError", {port: port, err: err});
-}
-
-function ipcOn(chan, f) {
-	if (typeof f == "function") {
-		ipc.on(chan, f);
-	}
-}
-
-function ipcSend(chan, msg) {
-	if (mainWindow) {
-		mainWindow.webContents.send(chan, msg);
-	}
 }
 
 function alreadyConnected(port) {
