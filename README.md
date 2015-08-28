@@ -14,6 +14,10 @@ Installation
 2. Copy the contents of `serialport` into `node_modules/serialport` in `neobombe`.
 3. Go to the `node_modules/serialport` folder and type `HOME=~/.electron-gyp node-gyp rebuild --target=0.29.2 --arch=ia64 --dist-url=https://atom.io/download/atom-shell`. Change `--target=0.29.2` to match your Electron version.
 
+Usage
+-----
+Once the application is run, the message fetching process can be started and stopped by pressing the `1` key. To switch between the main display (Home) and the status display (Status), press the `2` key. The Twitter `track` string can be changed in the Status display.
+
 Notes
 -----
 * Remove `Serial.println()` lines from `Arduino/libraries/Adafruit_Motor_Shield_V2_Library/utility/Adafruit_PWMServoDriver.cpp`
