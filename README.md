@@ -17,7 +17,3 @@ Installation
 Usage
 -----
 Once the application is run, the message fetching process can be started and stopped by pressing the `1` key. To switch between the main display (Home) and the status display (Status), press the `2` key. The Twitter `track` string can be changed in the Status display.
-
-Notes
------
-* Remove `Serial.println()` lines from `Arduino/libraries/Adafruit_Motor_Shield_V2_Library/utility/Adafruit_PWMServoDriver.cpp`
